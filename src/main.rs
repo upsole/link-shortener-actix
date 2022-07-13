@@ -1,14 +1,35 @@
-use actix_web::{get, App, HttpResponse, HttpServer};
+use actix_web::{web, App, HttpResponse, HttpServer};
 
-#[get("/ok")]
-async fn ok() -> HttpResponse {
-    HttpResponse::Ok().finish()
-}
+#[macro_use]
+extern crate diesel;
+
+pub mod models;
+pub mod routes;
+pub mod schema;
+
+use diesel::r2d2::ConnectionManager;
+use diesel::PgConnection;
+use dotenv::dotenv;
+use r2d2::Pool;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(ok))
-        .bind("127.0.0.1:4000")?
-        .run()
-        .await
+    // Build connection poool
+    dotenv().ok();
+    let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set in .env");
+    let manager = ConnectionManager::<PgConnection>::new(db_url);
+    let pool = Pool::builder()
+        .build(manager)
+        .expect("Failed to create pol");
+
+    // Run Server
+    HttpServer::new(move || {
+        App::new()
+            .app_data(web::Data::new(pool.clone()))
+            .service(routes::ok)
+            .service(routes::create)
+    })
+    .bind("127.0.0.1:4000")?
+    .run()
+    .await
 }
