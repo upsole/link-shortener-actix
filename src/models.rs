@@ -1,5 +1,5 @@
 use actix_web::web;
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{NaiveDateTime, Utc};
 use diesel::r2d2::ConnectionManager;
 use diesel::PgConnection;
 use diesel::{Insertable, Queryable};
@@ -66,6 +66,7 @@ impl From<web::Json<UrlRequestBody>> for ParsedPayload {
     }
 }
 
+// GENERATES STRING OF RANDOM CHARACTERS
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 fn gen_short_url(length: u16) -> String {
     let mut thread = thread_rng();

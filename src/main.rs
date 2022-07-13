@@ -1,4 +1,4 @@
-use actix_web::{web, App, HttpResponse, HttpServer};
+use actix_web::{web, App, HttpServer};
 
 #[macro_use]
 extern crate diesel;
@@ -28,6 +28,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone()))
             .service(routes::ok)
             .service(routes::create)
+            .service(routes::redirect)
     })
     .bind("127.0.0.1:4000")?
     .run()
